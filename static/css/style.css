@@ -15,7 +15,7 @@
 
 body {
     background-color: #0B0B0B;
-    color: #FFFBFC;
+    color: #FFFBFC !important;
     font-family: 'Montserrat', sans-serif;
     padding: 0 30px;
 }
@@ -39,6 +39,7 @@ body {
     border-radius: 10px;
     overflow: hidden;
     width: 300px;
+    color: #FFFBFC;
 }
 
 .card .img-card {

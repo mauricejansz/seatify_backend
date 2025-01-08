@@ -20,6 +20,7 @@ from django.urls import path, include
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('restaurants.urls'))
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                  path('admin/', admin.site.urls),
+                  path('', include('restaurants.urls', namespace='restaurant')),
+                  path('accounts/', include('accounts.urls', namespace='accounts')),
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

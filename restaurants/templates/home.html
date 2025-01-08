@@ -12,7 +12,7 @@
     </div>
     <div class="kanban-body">
         {% for restaurant in restaurants %}
-            <a href="{% url 'restaurant_detail' restaurant.id %}" class="text-decoration-none">
+            <a href="{% url 'restaurant:restaurant_detail' restaurant.id %}" class="text-decoration-none">
                 <div class="card mb-3">
                     <img src="{{ restaurant.image.url }}" class="card-img-top img-card"
                          alt="Restaurant Image">
