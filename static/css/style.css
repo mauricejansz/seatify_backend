@@ -1,0 +1,136 @@
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900; /* Variable font supports a range of weights */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-Italic-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
+}
+
+
+body {
+    background-color: #0B0B0B;
+    color: #FFFBFC;
+    font-family: 'Montserrat', sans-serif;
+    padding: 0 30px;
+}
+
+.btn-primary {
+    background-color: #EC058E;
+    color: #FFFBFC;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #FFFBFC;
+    color: #EC058E;
+}
+
+.card {
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 300px;
+}
+
+.card .img-card {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-title {
+    color: #FFFBFC;
+}
+
+.card-body {
+    padding: 15px;
+    color: #FFFBFC;
+}
+
+.card-body p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.tags {
+    display: flex;
+    gap: 10px;
+}
+
+.tag {
+    background-color: #EC058E;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #fff;
+}
+
+.tag.active {
+    background-color: #4CAF50; /* Green for Active */
+}
+
+.bg-primary {
+    background-color: #EC058E;
+    color: #FFFBFC;
+}
+
+.bg-inactive {
+    background-color: #6D8A96;
+    color: #FFFBFC;
+}
+
+.img-star {
+    width: 20px;
+    height: 20px;
+}
+
+.kanban-body {
+    padding-top: 30px;
+}
+
+a.text-decoration-none {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.text-decoration-none:hover {
+    opacity: 0.9;
+}
+
+.img-fluid {
+    border-radius: 8px;
+}
+
+.table-dark {
+    background-color: #1a1a1a;
+    color: #fff;
+}
+
+h1, h2 {
+    color: #EC058E;
+}
+.restaurant-name-input {
+    font-size: 2rem;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: white;
+}
+
+.cover-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #6c757d;
+    margin-top: 10px;
+}
