@@ -14,15 +14,26 @@
 
 
 body {
-    background-color: #0B0B0B;
-    color: #FFFBFC !important;
+    background-color: #FFFFFF;
+    color: #333333 !important;
     font-family: 'Montserrat', sans-serif;
     padding: 0 30px;
 }
 
+.nav-link {
+    color: #333333;
+}
+.nav-link:hover,
+.nav-link:focus,
+.nav-link:active,
+.nav-link.dropdown-toggle.show {
+    color: #333333 !important; /* Ensure the color stays consistent across all states */
+    text-decoration: none; /* Optional: Remove any underline */
+}
+
 .btn-primary {
-    background-color: #EC058E;
-    color: #FFFBFC;
+    background-color: #4CAF50;
+    color: #333333;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -31,15 +42,37 @@ body {
 
 .btn-primary:hover {
     background-color: #FFFBFC;
-    color: #EC058E;
+    color: #4CAF50;
 }
 
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.card-container a.text-decoration-none {
+    display: block; /* Ensure the anchor wraps tightly around the card */
+    margin: 0; /* Remove any extra margin */
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px; /* Adjust spacing between cards */
+    padding: 20px 0;
+}
+
+
 .card {
-    background-color: #1a1a1a;
+    background-color: #F0F2F5;
     border-radius: 10px;
     overflow: hidden;
     width: 300px;
-    color: #FFFBFC;
+    color: #333333;
+    margin: 0; /* Remove any default margins from the card */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .card .img-card {
@@ -49,12 +82,12 @@ body {
 }
 
 .card-title {
-    color: #FFFBFC;
+    color: #333333;
 }
 
 .card-body {
     padding: 15px;
-    color: #FFFBFC;
+    color: #333333;
 }
 
 .card-body p {
@@ -68,7 +101,7 @@ body {
 }
 
 .tag {
-    background-color: #EC058E;
+    background-color: #202C59;
     padding: 5px 10px;
     border-radius: 5px;
     font-size: 12px;
@@ -80,8 +113,8 @@ body {
 }
 
 .bg-primary {
-    background-color: #EC058E;
-    color: #FFFBFC;
+    background-color: #4CAF50;
+    color: #202C59;
 }
 
 .bg-inactive {
@@ -117,7 +150,7 @@ a.text-decoration-none:hover {
 }
 
 h1, h2 {
-    color: #EC058E;
+    color: #4CAF50;
 }
 .restaurant-name-input {
     font-size: 2rem;

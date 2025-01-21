@@ -11,25 +11,29 @@
         <a href="" class="btn btn-primary">Add Restaurant</a>
     </div>
     <div class="kanban-body">
-        {% for restaurant in restaurants %}
-            <a href="{% url 'restaurant:restaurant_detail' restaurant.id %}" class="text-decoration-none">
-                <div class="card mb-3">
-                    <img src="{{ restaurant.image.url }}" class="card-img-top img-card"
-                         alt="Restaurant Image">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ restaurant.name }}</h5>
-                        <p class="card-text">{{ restaurant.address }}</p>
-                        <p>
-                            <img src="{% static 'images/star.png' %}" alt="Star" class="img-star">
-                            {{ restaurant.rating }}
-                        </p>
-                        <span class="tag">{{ restaurant.cuisine }}</span>
-                        <span class="tag {% if restaurant.is_published %}bg-primary{% else %}bg-inactive{% endif %}">
-                        {% if restaurant.is_published %}Active{% else %}Inactive{% endif %}
-                    </span>
+        <div class="card-container">
+            {% for restaurant in restaurants %}
+                <a href="{% url 'restaurant:restaurant_detail' restaurant.id %}"
+                   class="text-decoration-none">
+                    <div class="card mb-3">
+                        <img src="{{ restaurant.image.url }}" class="card-img-top img-card"
+                             alt="Restaurant Image">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ restaurant.name }}</h5>
+                            <p class="card-text">{{ restaurant.address }}</p>
+                            <p>
+                                <img src="{% static 'images/star-100.svg' %}" alt="Star"
+                                     class="img-star">
+                                {{ restaurant.rating }}
+                            </p>
+                            <span class="tag">{{ restaurant.cuisine }}</span>
+                            <span class="tag {% if restaurant.is_published %}bg-primary{% else %}bg-inactive{% endif %}">
+                            {% if restaurant.is_published %}Active{% else %}Inactive{% endif %}
+                        </span>
+                        </div>
                     </div>
-                </div>
-            </a>
-        {% endfor %}
+                </a>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

@@ -132,5 +132,5 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.EmailBackend',  # Custom email-only backend
+    'accounts.backends.EmailOrUsernameBackend',  # Custom email-only backend
 ]
