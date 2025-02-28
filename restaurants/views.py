@@ -4,6 +4,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 from .models import Restaurant, Category, MenuItem, Slot, Table
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .serializers import RestaurantSerializer
 
 # Create your views here.
 @login_required(login_url='accounts:login')  # Redirect to login if not authenticated
@@ -119,3 +123,88 @@ def save_restaurant_details(request, restaurant_id):
 
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_restaurants(request):
+    restaurants = Restaurant.objects.all()
+    serializer = RestaurantSerializer(restaurants, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def get_available_slots(request, restaurant_id):
+    num_guests = request.GET.get("guests", None)
+    if num_guests is None:
+        return Response({"error": "Please provide the number of guests."}, status=400)
+
+    try:
+        num_guests = int(num_guests)
+    except ValueError:
+        return Response({"error": "Invalid number of guests."}, status=400)
+
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+
+    # Filter tables that can accommodate the guests
+    available_tables = restaurant.tables.filter(capacity__gte=num_guests)
+
+    # Get available slots for these tables
+    available_slots = Slot.objects.filter(table__in=available_tables, status="available").order_by(
+        "date", "time")
+
+    slots_data = [
+        {
+            "id": slot.id,
+            "table": slot.table.number,
+            "capacity": slot.table.capacity,
+            "date": slot.date,
+            "time": slot.time.strftime("%H:%M"),
+            "status": slot.status
+        }
+        for slot in available_slots
+    ]
+
+    return Response(slots_data, status=200)
+
+@api_view(["GET"])
+def get_reviews(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    reviews = restaurant.reviews.all().order_by("-id")  # Show latest reviews first
+
+    reviews_data = [
+        {
+            "id": review.id,
+            "user": review.user.username,
+            "name": review.name,
+            "rating": review.rating,
+            "comment": review.comment
+        }
+        for review in reviews
+    ]
+
+    return Response(reviews_data, status=200)
+
+@api_view(["GET"])
+def get_menu(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    categories = restaurant.categories.all()
+
+    menu_data = []
+    for category in categories:
+        menu_items = category.menu_items.filter(is_available=True)
+        items_data = [
+            {
+                "id": item.id,
+                "name": item.name,
+                "description": item.description,
+                "price": str(item.price)
+            }
+            for item in menu_items
+        ]
+
+        menu_data.append({
+            "category": category.name,
+            "items": items_data
+        })
+
+    return Response(menu_data, status=200)

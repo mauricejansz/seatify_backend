@@ -9,6 +9,8 @@ class User(AbstractUser):
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
     is_verified = models.BooleanField(default=False)
+    date_of_birth = models.DateField(null=True, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
 
     # Add unique related_name attributes to resolve conflicts
     groups = models.ManyToManyField(
