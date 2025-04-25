@@ -4,92 +4,96 @@ document.addEventListener("DOMContentLoaded", function () {
     const deletedTables = new Set();
     const deletedSlots = new Set();
 
-    // Add Line
-    document.querySelectorAll(".add-line-btn").forEach((btn) => {
-        btn.addEventListener("click", function () {
-            const table = this.previousElementSibling.querySelector("tbody");
-            const emptyLine = table.querySelector(".empty-line");
-            if (emptyLine) {
+    /** -----------------------------
+     *  Handle dynamically added lines
+     *  (supports all buttons: new + existing)
+     *  ---------------------------- */
+    document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("add-line-btn")) {
+            const categoryDiv = e.target.closest(".menu-category");
+            const table = categoryDiv?.querySelector(".menu-items-table tbody");
+            const emptyLine = table?.querySelector(".empty-line");
+
+            if (table && emptyLine) {
                 const newRow = emptyLine.cloneNode(true);
                 newRow.style.display = "";
                 newRow.classList.remove("empty-line");
-                newRow.querySelectorAll("input").forEach((input) => {
-                    input.value = ""; // Clear any existing values
-                });
+                newRow.querySelectorAll("input").forEach(input => input.value = "");
                 table.appendChild(newRow);
             } else {
-                console.error("No .empty-line found in table. Ensure your HTML structure includes a hidden .empty-line row.");
+                console.error("No .empty-line found in this category.");
             }
-        });
-    });
-
-    // Remove Line
-    document.addEventListener("click", function (e) {
-        if (e.target.classList.contains("remove-line-btn")) {
-            const row = e.target.closest("tr");
-            if (row.classList.contains("menu-item")) {
-                const menuItemId = row.getAttribute("data-menu-item-id");
-            if (menuItemId) {
-                deletedMenuItems.add(menuItemId); // Add to deleted items
-            }
-            } else if (row.classList.contains("table-item")) {
-                const tableId = row.getAttribute("data-table-id");
-                if (tableId) {
-                    deletedTables.add(tableId); // Add to deleted items
-                }
-            } else if (row.classList.contains("slot-item")) {
-                const slotId = row.getAttribute("data-slot-id");
-                if (slotId) {
-                    deletedSlots.add(slotId); // Add to deleted items
-                }
-            }
-            row.remove(); // Remove the row from the DOM
         }
     });
 
-    // Add Category
-    document.getElementById("add-category-btn").addEventListener("click", function () {
-        const container = document.getElementById("menu-container");
-        const categoryHtml = `
-            <div class="menu-category" data-category-id="new">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mt-3">
-                        <input type="text" class="form-control editable-input category-name" placeholder="New Category">
-                    </h5>
-                    <button class="btn btn-danger remove-category-btn">Remove Category</button>
-                </div>
-                <table class="table table-dark table-striped menu-items-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Price</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="empty-line" style="display: none;">
-                            <td><input type="text" class="form-control editable-input" id="menu-item-name" placeholder="Item Name"></td>
-                            <td><input type="text" class="form-control editable-input" id="menu-item-description" placeholder="Description"></td>
-                            <td><input type="number" class="form-control editable-input" id="menu-item-price" placeholder="Price"></td>
-                            <td><button class="btn btn-danger remove-line-btn">Remove</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button class="btn btn-primary add-line-btn">Add Line</button>
-            </div>
-        `;
-        container.insertAdjacentHTML("beforeend", categoryHtml);
+    /** -----------------------------
+     *  Remove Line & Track Deletions
+     *  ---------------------------- */
+    document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-line-btn")) {
+            const row = e.target.closest("tr");
+
+            if (row.classList.contains("menu-item")) {
+                const menuItemId = row.getAttribute("data-menu-item-id");
+                if (menuItemId) deletedMenuItems.add(menuItemId);
+            } else if (row.classList.contains("table-item")) {
+                const tableId = row.getAttribute("data-table-id");
+                if (tableId) deletedTables.add(tableId);
+            } else if (row.classList.contains("slot-item")) {
+                const slotId = row.getAttribute("data-slot-id");
+                if (slotId) deletedSlots.add(slotId);
+            }
+
+            row.remove();
+        }
     });
 
-    // Mark category for deletion
+    /** -----------------------------
+     *  Add New Category Block
+     *  ---------------------------- */
+    document.getElementById("add-category-btn").addEventListener("click", function () {
+        const container = document.getElementById("menu-container");
+        const html = `
+          <div class="menu-category" data-category-id="new">
+              <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="mt-3">
+                      <input type="text" class="form-control editable-input category-name" placeholder="New Category">
+                  </h5>
+                  <button class="btn btn-danger remove-category-btn">Remove Category</button>
+              </div>
+              <div class="menu-items-wrapper">
+                  <table class="table table-dark table-striped menu-items-table">
+                      <thead>
+                          <tr>
+                              <th>Name</th><th>Description</th><th>Price</th><th>Actions</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr class="empty-line" style="display: none;">
+                              <td><input type="text" class="form-control editable-input" id="menu-item-name" placeholder="Item Name"></td>
+                              <td><input type="text" class="form-control editable-input" id="menu-item-description" placeholder="Description"></td>
+                              <td><input type="number" class="form-control editable-input" id="menu-item-price" placeholder="Price"></td>
+                              <td><button class="btn btn-danger remove-line-btn">Remove</button></td>
+                          </tr>
+                      </tbody>
+                  </table>
+                  <button class="btn btn-primary add-line-btn mt-2">Add Line</button>
+              </div>
+          </div>
+        `;
+        container.insertAdjacentHTML("beforeend", html);
+    });
+
+    /** -----------------------------
+     *  Remove Category and track
+     *  ---------------------------- */
     document.addEventListener("click", function (e) {
         if (e.target.classList.contains("remove-category-btn")) {
             const categoryDiv = e.target.closest(".menu-category");
             const categoryId = categoryDiv.getAttribute("data-category-id");
 
             if (confirm("Are you sure you want to remove this category?")) {
-                if (categoryId) {
+                if (categoryId && categoryId !== "new") {
                     deletedCategories.add(categoryId);
                 }
                 categoryDiv.remove();
@@ -97,7 +101,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Save Button
+    /** -----------------------------
+     *  Save Restaurant Handler
+     *  ---------------------------- */
     document.getElementById("save-btn").addEventListener("click", function () {
         const data = {
             "restaurant-name": document.getElementById("restaurant-name").value,
@@ -120,11 +126,11 @@ document.addEventListener("DOMContentLoaded", function () {
             new_slots: [],
             updated_slots: [],
         };
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const restaurantId = document.getElementById("save-btn").getAttribute("data-restaurant-id");
 
-        // Collect category data
+        // Gather category + menu items
         document.querySelectorAll(".menu-category").forEach((category) => {
             const categoryId = category.getAttribute("data-category-id");
             const categoryName = category.querySelector(".category-name").value;
@@ -135,109 +141,88 @@ document.addEventListener("DOMContentLoaded", function () {
                 data.updated_categories.push({id: categoryId, name: categoryName});
             }
 
-            // Collect menu items for this category
             category.querySelectorAll(".menu-items-table tbody tr:not(.empty-line)").forEach((row) => {
-                const itemNameInput = row.querySelector("#menu-item-name");
-                const itemDescriptionInput = row.querySelector("#menu-item-description");
-                const itemPriceInput = row.querySelector("#menu-item-price");
+                const itemName = row.querySelector("#menu-item-name")?.value;
+                const itemDescription = row.querySelector("#menu-item-description")?.value;
+                const itemPrice = row.querySelector("#menu-item-price")?.value;
 
-                if (itemNameInput && itemDescriptionInput && itemPriceInput) {
-                    const itemName = itemNameInput.value;
-                    const itemDescription = itemDescriptionInput.value;
-                    const itemPrice = itemPriceInput.value;
+                if (!itemName || !itemPrice) return;
 
-                    const menuItemId = row.getAttribute("data-menu-item-id"); // Fetch the menu item ID
+                const itemId = row.getAttribute("data-menu-item-id");
 
-                    if (categoryId === "new" || !menuItemId) {
-                        data.new_menu_items.push({
-                            category_name: categoryName,
-                            name: itemName,
-                            description: itemDescription,
-                            price: itemPrice,
-                        });
-                    } else {
-                        if (menuItemId) {
-                            data.updated_menu_items.push({
-                                id: menuItemId, // Include the ID for updated items
-                                category_id: categoryId,
-                                name: itemName,
-                                description: itemDescription,
-                                price: itemPrice,
-                            });
-                        }
-                    }
+                if (categoryId === "new" || !itemId) {
+                    data.new_menu_items.push({
+                        category_name: categoryName,
+                        name: itemName,
+                        description: itemDescription,
+                        price: itemPrice,
+                    });
+                } else {
+                    data.updated_menu_items.push({
+                        id: itemId,
+                        category_id: categoryId,
+                        name: itemName,
+                        description: itemDescription,
+                        price: itemPrice,
+                    });
                 }
             });
         });
 
+        // Gather tables
         document.querySelectorAll("#table-info tbody tr:not(.empty-line)").forEach((row) => {
             const tableId = row.getAttribute("data-table-id");
-            const tableNumber = row.querySelector("td:nth-child(1) input").value;
-            const tableCapacity = row.querySelector("td:nth-child(2) input").value;
+            const number = row.querySelector("td:nth-child(1) input")?.value;
+            const capacity = row.querySelector("td:nth-child(2) input")?.value;
 
-            if (!tableNumber || !tableCapacity) return; // Skip invalid entries
+            if (!number || !capacity) return;
 
-            if (tableId) {
-                // Updated table
-                data.updated_tables.push({
-                    id: tableId,
-                    number: tableNumber,
-                    capacity: tableCapacity,
-                });
-            } else {
-                // New table
-                data.new_tables.push({
-                    number: tableNumber,
-                    capacity: tableCapacity,
-                });
-            }
+            const payload = {number, capacity};
+
+            tableId
+                ? data.updated_tables.push({id: tableId, ...payload})
+                : data.new_tables.push(payload);
         });
 
+        // Gather slots
         document.querySelectorAll("#available-slots tbody tr:not(.empty-line)").forEach((row) => {
             const slotId = row.getAttribute("data-slot-id");
-            const slotTime = row.querySelector("#slot-item-time").value;
-            const slotDate = row.querySelector("#slot-item-date").value;
-            const slotTable = row.querySelector("#slot-table-number").value;
+            const time = row.querySelector("#slot-item-time")?.value;
+            const date = row.querySelector("#slot-item-date")?.value;
+            const table_id = row.querySelector("#slot-table-number")?.value;
 
-            if (!slotTime || !slotTable || !slotDate) return; // Skip invalid entries
+            if (!time || !date || !table_id) return;
 
-            if (slotId) {
-                // Updated slot
-                data.updated_slots.push({
-                    id: slotId,
-                    time: slotTime,
-                    table_id: slotTable,
-                    date: slotDate,
-                });
-            } else {
-                // New slot
-                data.new_slots.push({
-                    time: slotTime,
-                    table_id: slotTable,
-                    date: slotDate,
-                });
-            }
+            const payload = {time, date, table_id};
+
+            slotId
+                ? data.updated_slots.push({id: slotId, ...payload})
+                : data.new_slots.push(payload);
         });
 
         console.log("Data to save:", data);
 
         fetch(`/restaurant/${restaurantId}/save/`, {
             method: "POST",
-            headers: {"Content-Type": "application/json", "X-CSRFToken": csrfToken},
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
             body: JSON.stringify(data),
         })
-            .then((response) => {
-                if (response.ok) {
+            .then(res => {
+                if (res.ok) {
                     alert("Changes saved!");
                     deletedCategories.clear();
                     deletedMenuItems.clear();
                     deletedTables.clear();
+                    deletedSlots.clear();
                 } else {
                     alert("Failed to save.");
                 }
             })
-            .catch((error) => {
-                console.error("Error:", error);
+            .catch(err => {
+                console.error("Save error:", err);
             });
     });
 });

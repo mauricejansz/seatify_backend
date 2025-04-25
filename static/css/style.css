@@ -45,6 +45,20 @@ body {
     color: #4CAF50;
 }
 
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    color: #fff;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .card-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

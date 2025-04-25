@@ -8,7 +8,7 @@
 {% block content %}
     <div class="d-flex justify-content-between align-items-center">
         <h3>Restaurants</h3>
-        <a href="" class="btn btn-primary">Add Restaurant</a>
+        <a href="{% url 'restaurant:create_restaurant' %}" class="btn btn-primary">Add Restaurant</a>
     </div>
     <div class="kanban-body">
         <div class="card-container">

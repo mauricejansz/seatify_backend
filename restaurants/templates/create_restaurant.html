@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Create Restaurant - Seatify
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <form method="POST" action="{% url 'restaurant:create_restaurant' %}"
+              enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <h3>Create Restaurant</h3>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <label><strong>Name</strong></label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label><strong>Phone</strong></label>
+                    <input type="text" name="phone" class="form-control">
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <label><strong>Address</strong></label>
+                    <input type="text" name="address" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label><strong>Cuisine</strong></label>
+                    <select name="cuisine_id" class="form-select">
+                        {% for cuisine in cuisines %}
+                            <option value="{{ cuisine.id }}">{{ cuisine.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <label><strong>Latitude</strong></label>
+                    <input type="text" name="latitude" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label><strong>Longitude</strong></label>
+                    <input type="text" name="longitude" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label><strong>Cover Image</strong></label>
+                    <input type="file" name="image" class="form-control">
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col text-end">
+                    <button type="submit" class="btn btn-primary">Create Restaurant</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -10,6 +10,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .serializers import RestaurantSerializer, ReservationSerializer, ReviewSerializer, SavedRestaurantSerializer, CuisineSerializer, ReservationListSerializer
 from datetime import datetime
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import user_passes_test
+from .forms import CuisineForm
+from django.views.decorators.http import require_POST
 
 
 @login_required(login_url='accounts:login')
@@ -20,18 +24,86 @@ def home(request):
         restaurants = Restaurant.objects.filter(user=request.user)
     return render(request, 'home.html', {'restaurants': restaurants})
 
+def super_admin_required(view_func):
+    return user_passes_test(lambda u: u.is_authenticated and u.role == 'super_admin')(view_func)
+
+@super_admin_required
+def manage_cuisines(request):
+    cuisines = Cuisine.objects.all()
+    return render(request, 'manage_cuisines.html', {'cuisines': cuisines})
+
+def create_cuisine(request):
+    if request.method == 'POST':
+        form = CuisineForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('restaurant:manage_cuisines')
+    else:
+        form = CuisineForm()
+    return render(request, 'create_cuisine.html', {'form': form})
+
+def edit_cuisine(request, cuisine_id):
+    cuisine = Cuisine.objects.get(id=cuisine_id)
+    if request.method == 'POST':
+        form = CuisineForm(request.POST, request.FILES, instance=cuisine)
+        if form.is_valid():
+            form.save()
+            return redirect('restaurant:manage_cuisines')
+    else:
+        form = CuisineForm(instance=cuisine)
+    return render(request, 'edit_cuisine.html', {'form': form, 'cuisine': cuisine})
+
+@require_POST
+def delete_cuisine(request, cuisine_id):
+    cuisine = get_object_or_404(Cuisine, id=cuisine_id)
+    cuisine.delete()
+    return redirect('restaurant:manage_cuisines')
+
 
 @login_required(login_url='accounts:login')
 def restaurant_detail(request, restaurant_id):
     restaurant = get_object_or_404(Restaurant, id=restaurant_id)
     categories = restaurant.categories.all()
     tables = restaurant.tables.all()
+    cuisines = Cuisine.objects.all()
     return render(request, 'restaurant_detail.html', {
         'restaurant': restaurant,
         'categories': categories,
         'tables': tables,
+        'cuisines': cuisines
     })
 
+@login_required(login_url='accounts:login')
+def create_restaurant(request):
+    if request.method == 'POST':
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        address = request.POST.get("address")
+        description = request.POST.get("description", "")
+        cuisine_id = request.POST.get("cuisine_id")
+        latitude = request.POST.get("latitude")
+        longitude = request.POST.get("longitude")
+        image = request.FILES.get("image")
+
+        cuisine = get_object_or_404(Cuisine, id=cuisine_id)
+
+        restaurant = Restaurant.objects.create(
+            name=name,
+            phone=phone,
+            address=address,
+            description=description,
+            cuisine=cuisine,
+            latitude=latitude or 0,
+            longitude=longitude or 0,
+            user=request.user,
+            image=image,
+            is_published=True,
+        )
+
+        return redirect('restaurant:restaurant_detail', restaurant_id=restaurant.id)
+
+    cuisines = Cuisine.objects.all()
+    return render(request, 'create_restaurant.html', {"cuisines": cuisines})
 
 @csrf_exempt
 def save_restaurant_details(request, restaurant_id):
@@ -47,7 +119,9 @@ def save_restaurant_details(request, restaurant_id):
         )
         restaurant.latitude = data.get("latitude", restaurant.latitude)
         restaurant.longitude = data.get("longitude", restaurant.longitude)
-        restaurant.cuisine = data.get("cuisine", restaurant.cuisine)
+        cuisine_id = data.get("cuisine")
+        if cuisine_id:
+            restaurant.cuisine = get_object_or_404(Cuisine, id=cuisine_id)
         restaurant.save()
 
         deleted_categories = data.get("deleted_categories", [])
@@ -133,6 +207,14 @@ def save_restaurant_details(request, restaurant_id):
 
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
+@login_required(login_url='accounts:login')
+def delete_restaurant(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    if request.method == 'POST' and (restaurant.user == request.user or request.user.role == 'super_admin'):
+        restaurant.delete()
+        return redirect('restaurant:home')
+    return JsonResponse({'error': 'Unauthorized or invalid request'}, status=403)
 
 
 @api_view(["GET"])

@@ -168,3 +168,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'maurice.20222202@iit.ac.lk'
 EMAIL_HOST_PASSWORD = 'tagnjppkintxfarx'
+
+
+BACKEND_URL = "http://localhost:8000"

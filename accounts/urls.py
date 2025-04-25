@@ -8,6 +8,10 @@ urlpatterns = [
     # Server-Side Login and Logout for Web App
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('users/', views.manage_users, name='manage_users'),
+    path('users/create/', views.create_user, name='create_user'),
+    path('users/<int:user_id>/edit/', views.edit_user, name='edit_user'),
+    path('users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
 
     # API Endpoints for Mobile App
     path('api/login/', views.LoginView.as_view(), name='api-login'),

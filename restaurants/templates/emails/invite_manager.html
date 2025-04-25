@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>You're invited to Seatify!</title>
+</head>
+<body style="font-family: sans-serif; background-color: #f9f9f9; padding: 20px;">
+<div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
+    <img src="{{ STATIC_URL }}images/logo.png" alt="Seatify Logo"
+         style="height: 60px; margin-bottom: 20px;"/>
+
+    <h2>Welcome to Seatify, {{ user.first_name }}!</h2>
+    <p>Your account has been created by the Seatify admin team. Use the credentials below to log
+        in:</p>
+
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Password:</strong> {{ password }}</p>
+
+    <p>Click the button below to log in:</p>
+    <a href="{{ login_url }}"
+       style="background-color: #4CAF50; padding: 10px 20px; color: white; text-decoration: none; border-radius: 5px;">Log
+        In to Seatify</a>
+
+    <p>If you didn’t expect this email, please ignore it.</p>
+    <p style="margin-top: 30px;">– The Seatify Team</p>
+</div>
+</body>
+</html>
