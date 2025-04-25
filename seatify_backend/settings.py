@@ -155,7 +155,9 @@ SIMPLE_JWT = {
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    "ultimate-wired-troll.ngrok-free.app"  # Static Ngrok domain
+    "ultimate-wired-troll.ngrok-free.app",
+    "seatify.zenvoerp.com",
+    "188.166.241.107:8001"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -170,4 +172,4 @@ EMAIL_HOST_USER = 'maurice.20222202@iit.ac.lk'
 EMAIL_HOST_PASSWORD = 'tagnjppkintxfarx'
 
 
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = "http://www.seatify.zenvoerp.com"
