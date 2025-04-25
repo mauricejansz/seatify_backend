@@ -13,7 +13,6 @@ class EmailOrUsernameBackend(BaseBackend):
         Attempt to authenticate the user with either email or username.
         """
         try:
-            # Check if the username is an email
             if '@' in username and '.' in username:
                 user = User.objects.get(email=username)
             else:
@@ -21,7 +20,6 @@ class EmailOrUsernameBackend(BaseBackend):
         except User.DoesNotExist:
             return None
 
-        # Check the password and whether the user is active
         if user.check_password(password) and self.user_can_authenticate(user):
             return user
 

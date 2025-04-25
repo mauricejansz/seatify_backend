@@ -2,20 +2,26 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from .models import Restaurant, Category, MenuItem, Slot, Table, Reservation, Review, SavedRestaurant, Cuisine
 import json
-from .models import Restaurant, Category, MenuItem, Slot, Table
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .serializers import RestaurantSerializer
+from .serializers import RestaurantSerializer, ReservationSerializer, ReviewSerializer, SavedRestaurantSerializer, CuisineSerializer, ReservationListSerializer
+from datetime import datetime
 
-# Create your views here.
-@login_required(login_url='accounts:login')  # Redirect to login if not authenticated
+
+@login_required(login_url='accounts:login')
 def home(request):
-    restaurants = Restaurant.objects.all()
+    if request.user.role == 'super_admin':
+        restaurants = Restaurant.objects.all()
+    else:
+        restaurants = Restaurant.objects.filter(user=request.user)
     return render(request, 'home.html', {'restaurants': restaurants})
 
-@login_required(login_url='accounts:login')  # Redirect to login if not authenticated
+
+@login_required(login_url='accounts:login')
 def restaurant_detail(request, restaurant_id):
     restaurant = get_object_or_404(Restaurant, id=restaurant_id)
     categories = restaurant.categories.all()
@@ -26,23 +32,24 @@ def restaurant_detail(request, restaurant_id):
         'tables': tables,
     })
 
+
 @csrf_exempt
 def save_restaurant_details(request, restaurant_id):
     if request.method == "POST":
         data = json.loads(request.body)
         restaurant = get_object_or_404(Restaurant, id=restaurant_id)
 
-        # Update restaurant fields
         restaurant.name = data.get("restaurant-name", restaurant.name)
         restaurant.phone = data.get("phone", restaurant.phone)
         restaurant.address = data.get("address", restaurant.address)
-        restaurant.description = data.get("description", restaurant.description)
+        restaurant.description = data.get(
+            "description", restaurant.description
+        )
         restaurant.latitude = data.get("latitude", restaurant.latitude)
         restaurant.longitude = data.get("longitude", restaurant.longitude)
         restaurant.cuisine = data.get("cuisine", restaurant.cuisine)
         restaurant.save()
 
-        # Handle deleted categories
         deleted_categories = data.get("deleted_categories", [])
         Category.objects.filter(id__in=deleted_categories).delete()
 
@@ -55,22 +62,23 @@ def save_restaurant_details(request, restaurant_id):
         deleted_slots = data.get("deleted_slots", [])
         Slot.objects.filter(id__in=deleted_slots).delete()
 
-        # Handle new categories
         new_categories = data.get("new_categories", [])
         for new_category in new_categories:
-            Category.objects.create(restaurant=restaurant, name=new_category["name"])
+            Category.objects.create(
+                restaurant=restaurant, name=new_category["name"]
+            )
 
-        # Handle updated categories
         updated_categories = data.get("updated_categories", [])
         for updated_category in updated_categories:
             category = get_object_or_404(Category, id=updated_category["id"])
             category.name = updated_category["name"]
             category.save()
 
-        # Handle new menu items
         new_menu_items = data.get("new_menu_items", [])
         for new_item in new_menu_items:
-            category = Category.objects.filter(name=new_item["category_name"], restaurant=restaurant).first()
+            category = Category.objects.filter(
+                name=new_item["category_name"], restaurant=restaurant
+            ).first()
             if category:
                 category.menu_items.create(
                     name=new_item["name"],
@@ -78,16 +86,16 @@ def save_restaurant_details(request, restaurant_id):
                     price=new_item["price"]
                 )
 
-        # Handle updated menu items
         updated_menu_items = data.get("updated_menu_items", [])
         for updated_item in updated_menu_items:
             menu_item = get_object_or_404(MenuItem, id=updated_item["id"])
             menu_item.name = updated_item.get("name", menu_item.name)
-            menu_item.description = updated_item.get("description", menu_item.description)
+            menu_item.description = updated_item.get(
+                "description", menu_item.description
+            )
             menu_item.price = updated_item.get("price", menu_item.price)
             menu_item.save()
 
-        # Handle new tables
         new_tables = data.get("new_tables", [])
         for new_table in new_tables:
             restaurant.tables.create(
@@ -103,10 +111,11 @@ def save_restaurant_details(request, restaurant_id):
                 table.capacity = updated_table["capacity"]
                 table.save()
 
-        # Handle new slots
         new_slots = data.get("new_slots", [])
         for new_slot in new_slots:
-            table = Table.objects.filter(id=new_slot["table_id"], restaurant=restaurant).first()
+            table = Table.objects.filter(
+                id=new_slot["table_id"], restaurant=restaurant
+            ).first()
             if table:
                 table.slots.create(
                     time=new_slot["time"],
@@ -116,13 +125,15 @@ def save_restaurant_details(request, restaurant_id):
         updated_slots = data.get("updated_slots", [])
         for updated_slot in updated_slots:
             slot = get_object_or_404(Slot, id=updated_slot["id"])
-            slot.table = Table.objects.filter(id=updated_slot["table_id"], restaurant=restaurant).first()
+            slot.table = Table.objects.filter(
+                id=updated_slot["table_id"], restaurant=restaurant).first()
             slot.time = updated_slot.get("time", slot.time)
             slot.date = updated_slot.get("date", slot.date)
             slot.save()
 
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -135,29 +146,33 @@ def get_restaurants(request):
 @api_view(["GET"])
 def get_available_slots(request, restaurant_id):
     num_guests = request.GET.get("guests", None)
-    if num_guests is None:
-        return Response({"error": "Please provide the number of guests."}, status=400)
+    date_str = request.GET.get("date", None)
+
+    if num_guests is None or date_str is None:
+        return Response({"error": "Please provide the number of guests and a date."}, status=400)
 
     try:
         num_guests = int(num_guests)
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
-        return Response({"error": "Invalid number of guests."}, status=400)
+        return Response({"error": "Invalid number of guests or date format."}, status=400)
 
     restaurant = get_object_or_404(Restaurant, id=restaurant_id)
 
-    # Filter tables that can accommodate the guests
     available_tables = restaurant.tables.filter(capacity__gte=num_guests)
 
-    # Get available slots for these tables
-    available_slots = Slot.objects.filter(table__in=available_tables, status="available").order_by(
-        "date", "time")
+    available_slots = Slot.objects.filter(
+        table__in=available_tables,
+        status="available",
+        date=date_obj
+    ).order_by("time")
 
     slots_data = [
         {
             "id": slot.id,
             "table": slot.table.number,
             "capacity": slot.table.capacity,
-            "date": slot.date,
+            "date": slot.date.strftime("%Y-%m-%d"),
             "time": slot.time.strftime("%H:%M"),
             "status": slot.status
         }
@@ -166,23 +181,16 @@ def get_available_slots(request, restaurant_id):
 
     return Response(slots_data, status=200)
 
+
 @api_view(["GET"])
 def get_reviews(request, restaurant_id):
+    """Retrieve all reviews for a restaurant, ordered by latest."""
     restaurant = get_object_or_404(Restaurant, id=restaurant_id)
-    reviews = restaurant.reviews.all().order_by("-id")  # Show latest reviews first
+    reviews = restaurant.reviews.all().order_by("-id")
 
-    reviews_data = [
-        {
-            "id": review.id,
-            "user": review.user.username,
-            "name": review.name,
-            "rating": review.rating,
-            "comment": review.comment
-        }
-        for review in reviews
-    ]
+    serializer = ReviewSerializer(reviews, many=True)
+    return Response(serializer.data, status=200)
 
-    return Response(reviews_data, status=200)
 
 @api_view(["GET"])
 def get_menu(request, restaurant_id):
@@ -208,3 +216,186 @@ def get_menu(request, restaurant_id):
         })
 
     return Response(menu_data, status=200)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_reservation(request):
+    user = request.user
+    data = request.data
+
+    restaurant_id = data.get("restaurant_id")
+    slot_id = data.get("slot_id")
+    number_of_guests = data.get("number_of_guests")
+    comments = data.get("comments", "")
+
+    if not all([restaurant_id, slot_id, number_of_guests]):
+        return Response({"error": "Missing required fields"}, status=400)
+
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    slot = get_object_or_404(Slot, id=slot_id)
+    table = slot.table
+    date = slot.date
+
+    if slot.status != "available":
+        return Response({"error": "Selected slot is not available"}, status=400)
+
+    reservation = Reservation.objects.create(
+        user=user,
+        restaurant=restaurant,
+        table=table,
+        slot=slot,
+        date=date,
+        number_of_guests=number_of_guests,
+        comments=comments,
+        status="confirmed",
+        payment_status="paid",
+    )
+
+    slot.status = "reserved"
+    slot.save()
+
+    return Response(ReservationSerializer(reservation).data, status=201)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_review(request, restaurant_id):
+    """
+    Endpoint to allow authenticated users to add a review to a restaurant.
+    """
+    user = request.user
+    restaurant = Restaurant.objects.filter(id=restaurant_id).first()
+
+    if not restaurant:
+        return Response({"error": "Restaurant not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    rating = request.data.get("rating")
+    if rating is None or not (0.0 <= float(rating) <= 5.0):
+        return Response({"error": "Invalid rating. Must be between 0 and 5."}, status=400)
+
+    comment = request.data.get("comment", "")
+
+    if Review.objects.filter(user=user, restaurant=restaurant).exists():
+        return Response({"error": "You have already reviewed this restaurant."}, status=400)
+
+    review = Review.objects.create(
+        restaurant=restaurant,
+        user=user,
+        name=f"{user.first_name} {user.last_name}",
+        rating=float(rating),
+        comment=comment
+    )
+
+    serializer = ReviewSerializer(review)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_review(request, review_id):
+    """
+    Endpoint to allow users to delete their own reviews.
+    """
+    user = request.user
+    review = Review.objects.filter(id=review_id).first()
+
+    if not review:
+        return Response({"error": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if review.user != user:
+        return Response({"error": "You can only delete your own reviews."}, status=status.HTTP_403_FORBIDDEN)
+
+    review.delete()
+    return Response({"message": "Review deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def toggle_saved_restaurant(request, restaurant_id):
+    user = request.user
+    restaurant = Restaurant.objects.get(id=restaurant_id)
+
+    saved_entry, created = SavedRestaurant.objects.get_or_create(
+        user=user, restaurant=restaurant
+    )
+
+    if not created:
+        saved_entry.delete()
+        return Response({"message": "Restaurant removed from saved list."}, status=status.HTTP_200_OK)
+
+    return Response({"message": "Restaurant added to saved list."}, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_saved_restaurants(request):
+    user = request.user
+    saved_restaurants = SavedRestaurant.objects.filter(user=user)
+    serializer = SavedRestaurantSerializer(saved_restaurants, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_cuisines(request):
+    cuisines = Cuisine.objects.all()
+    serializer = CuisineSerializer(
+        cuisines, many=True, context={"request": request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_recent_bookings(request):
+    user = request.user
+
+    restaurant_ids = (
+        Reservation.objects
+        .filter(user=user)
+        .order_by('-date')
+        .values_list("restaurant_id", flat=True)
+        .distinct()[:5]
+    )
+
+    recent_restaurants = Restaurant.objects.filter(id__in=restaurant_ids)
+
+    serializer = RestaurantSerializer(recent_restaurants, many=True)
+    return Response(serializer.data, status=200)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_saved_restaurant_details(request):
+    user = request.user
+
+    saved_restaurants = SavedRestaurant.objects.filter(user=user)
+
+    restaurant_ids = saved_restaurants.values_list("restaurant_id", flat=True)
+
+    restaurants = Restaurant.objects.filter(id__in=restaurant_ids)
+
+    serializer = RestaurantSerializer(restaurants, many=True)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def check_saved_status(request, restaurant_id):
+    """
+    Check if a restaurant is saved by the current user.
+    """
+    user = request.user
+    is_saved = SavedRestaurant.objects.filter(
+        user=user, restaurant_id=restaurant_id).exists()
+    return Response({"saved": is_saved}, status=200)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def list_user_reservations(request):
+    reservations = Reservation.objects.filter(user=request.user).select_related(
+        "restaurant", "slot").order_by("-date")
+    serializer = ReservationListSerializer(reservations, many=True)
+    return Response(serializer.data)

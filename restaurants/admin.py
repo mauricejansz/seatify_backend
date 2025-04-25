@@ -1,13 +1,16 @@
 from django.contrib import admin
-from .models import Restaurant, Category, Table, Slot, MenuItem, SavedRestaurant, RestaurantHour, Review
+from . import models
 # Register your models here.
 
-admin.site.register(Restaurant)
-admin.site.register(Category)
-admin.site.register(MenuItem)
-admin.site.register(Table)
-admin.site.register(Slot)
-admin.site.register(SavedRestaurant)
-admin.site.register(RestaurantHour)
-admin.site.register(Review)
+admin.site.register(models.Restaurant)
+admin.site.register(models.Category)
+admin.site.register(models.MenuItem)
+admin.site.register(models.Table)
+admin.site.register(models.Slot)
+admin.site.register(models.SavedRestaurant)
+admin.site.register(models.RestaurantHour)
+admin.site.register(models.Review)
+admin.site.register(models.Reservation)
+admin.site.register(models.Cuisine)
+
 

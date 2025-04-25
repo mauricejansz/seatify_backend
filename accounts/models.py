@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
+from django.conf import settings
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -12,7 +13,6 @@ class User(AbstractUser):
     date_of_birth = models.DateField(null=True, blank=True)
     phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
 
-    # Add unique related_name attributes to resolve conflicts
     groups = models.ManyToManyField(
         Group,
         related_name="custom_user_groups",
@@ -30,3 +30,14 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_verification")
+    code = models.CharField(max_length=6)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Email Verification for {self.user.email} - Verified: {self.is_verified}"

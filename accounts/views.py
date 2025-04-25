@@ -6,43 +6,47 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import User
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from .models import EmailVerification
+import random
+import json
+from django.http import JsonResponse
+from rest_framework.decorators import permission_classes
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
 
 
-# Server-Side Login View for Web App
 def login_view(request):
     if request.method == "POST":
-        identifier = request.POST.get('identifier')  # Can be email or username
+        identifier = request.POST.get('identifier')
         password = request.POST.get('password')
 
-        # Use 'username' as the key since our custom backend accepts both username or email
         user = authenticate(request, username=identifier, password=password)
 
         if user:
             login(request, user)
-            return redirect('restaurant:home')  # Redirect after login
+            return redirect('restaurant:home')
         else:
             messages.error(request, "Invalid username/email or password.")
     return render(request, 'sign_in.html')
 
 
-# Server-Side Logout View for Web App
 def logout_view(request):
     logout(request)
     return redirect('accounts:login')
 
 
-# API Login View for Mobile App
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        identifier = request.data.get('identifier')  # Username or email
+        identifier = request.data.get('identifier')
         password = request.data.get('password')
 
-        # Use 'username' since our backend supports email or username
         user = authenticate(request, username=identifier, password=password)
         if user:
-            # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
@@ -50,13 +54,15 @@ class LoginView(APIView):
                 'user': {
                     'id': user.id,
                     'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'phone_number': user.phone_number,
                     'email': user.email
                 }
             })
         return Response({'error': 'Invalid credentials'}, status=400)
 
 
-# API Logout View for Mobile App
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -64,13 +70,12 @@ class LogoutView(APIView):
         try:
             refresh_token = request.data.get('refresh')
             token = RefreshToken(refresh_token)
-            token.blacklist()  # Blacklist the token
+            token.blacklist()
             return Response({'message': 'Successfully logged out'})
         except Exception as e:
             return Response({'error': str(e)}, status=400)
 
 
-# API Sign-Up View for Mobile App
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
@@ -103,10 +108,27 @@ class SignUpView(APIView):
             date_of_birth=date_of_birth,
             phone_number=phone_number
         )
-        return Response({'message': 'User registered successfully'})
+
+        code = str(random.randint(100000, 999999))
+
+        EmailVerification.objects.create(
+            user=user,
+            code=code,
+            is_verified=False
+        )
+
+        subject = "Verify your email - Seatify"
+        html_message = render_to_string(
+            "emails/verify_email.html",
+            {"user": user, "code": code}
+        )
+        email_message = EmailMessage(subject, html_message, to=[email])
+        email_message.content_subtype = "html"
+        email_message.send()
+
+        return Response({'message': 'User registered successfully. Please check your email for verification.'})
 
 
-# API User Profile View for Mobile App
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -118,6 +140,7 @@ class UserProfileView(APIView):
             'email': user.email
         })
 
+
 class ValidateTokenView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -126,3 +149,38 @@ class ValidateTokenView(APIView):
         return Response({
             "username": user.username
         })
+
+@csrf_exempt
+def verify_email_code(request):
+    try:
+        data = json.loads(request.body)
+        email = data.get("email")
+        code = data.get("code")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    user = get_object_or_404(User, email=email)
+
+    try:
+        record = EmailVerification.objects.get(user=user)
+        if record.code == code:
+            record.is_verified = True
+            record.save()
+            return JsonResponse({"message": "Email verified successfully"}, status=200)
+        else:
+            return JsonResponse({"error": "Invalid verification code"}, status=400)
+    except EmailVerification.DoesNotExist:
+        return JsonResponse({"error": "Verification record not found"}, status=404)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user
+    data = request.data
+    user.first_name = data.get('first_name', user.first_name)
+    user.last_name = data.get('last_name', user.last_name)
+    user.username = data.get('username', user.username)
+    user.phone_number = data.get('phone_number', user.phone_number)
+    user.save()
+    return Response({"message": "Profile updated successfully"}, status=200)
