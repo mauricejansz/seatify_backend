@@ -160,6 +160,8 @@ ALLOWED_HOSTS = [
     "188.166.241.107:8001"
 ]
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 CSRF_TRUSTED_ORIGINS = [
     "https://ultimate-wired-troll.ngrok-free.app"
 ]
