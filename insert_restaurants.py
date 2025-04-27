@@ -49,12 +49,12 @@ monsoon_manager, _ = User.objects.get_or_create(
 
 # Regular Users
 user1, _ = User.objects.get_or_create(
-    username="john_doe",
+    username="ted_mosby",
     defaults={
-        "email": "john.doe@example.com",
+        "email": "ted.mosby@gmail.com",
         "password": make_password("user123"),
-        "first_name": "John",
-        "last_name": "Doe",
+        "first_name": "Ted",
+        "last_name": "Mosby",
         "role": "user",
         "phone_number": "+94771234568",
         "date_of_birth": date(1990, 1, 1),
@@ -63,12 +63,12 @@ user1, _ = User.objects.get_or_create(
 )
 
 user2, _ = User.objects.get_or_create(
-    username="sarah_smith",
+    username="marshal_eriksen",
     defaults={
-        "email": "sarah.smith@example.com",
+        "email": "marshal.eriksen@gmail.com",
         "password": make_password("user123"),
-        "first_name": "Sarah",
-        "last_name": "Smith",
+        "first_name": "Marshal",
+        "last_name": "Eriksen",
         "role": "user",
         "phone_number": "+94771234569",
         "date_of_birth": date(1992, 2, 2),
@@ -77,12 +77,12 @@ user2, _ = User.objects.get_or_create(
 )
 
 user3, _ = User.objects.get_or_create(
-    username="mike_wilson",
+    username="lily_aldrin",
     defaults={
-        "email": "mike.wilson@example.com",
+        "email": "lily.aldrin@gmail.com",
         "password": make_password("user123"),
-        "first_name": "Mike",
-        "last_name": "Wilson",
+        "first_name": "Lily",
+        "last_name": "Aldrin",
         "role": "user",
         "phone_number": "+94771234570",
         "date_of_birth": date(1988, 3, 3),
@@ -91,12 +91,12 @@ user3, _ = User.objects.get_or_create(
 )
 
 user4, _ = User.objects.get_or_create(
-    username="lisa_jones",
+    username="barney_stinson",
     defaults={
-        "email": "lisa.jones@example.com",
+        "email": "barney_stinson@gmail.com",
         "password": make_password("user123"),
-        "first_name": "Lisa",
-        "last_name": "Jones",
+        "first_name": "Barney",
+        "last_name": "Stinson",
         "role": "user",
         "phone_number": "+94771234571",
         "date_of_birth": date(1995, 4, 4),
@@ -105,12 +105,12 @@ user4, _ = User.objects.get_or_create(
 )
 
 user5, _ = User.objects.get_or_create(
-    username="david_brown",
+    username="robin_scherbatsky",
     defaults={
-        "email": "david.brown@example.com",
+        "email": "robin_scherbatsky@gmail.com",
         "password": make_password("user123"),
-        "first_name": "David",
-        "last_name": "Brown",
+        "first_name": "Robin",
+        "last_name": "Scherbatsky",
         "role": "user",
         "phone_number": "+94771234572",
         "date_of_birth": date(1993, 5, 5),
@@ -159,14 +159,6 @@ fine_dining, _ = Cuisine.objects.get_or_create(
     }
 )
 
-buffet, _ = Cuisine.objects.get_or_create(
-    name="Buffet",
-    defaults={
-        "image": "cuisine_images/buffet.jpg",
-        "keyword": "international buffet, graze, hilton"
-    }
-)
-
 german, _ = Cuisine.objects.get_or_create(
     name="German",
     defaults={
@@ -180,7 +172,7 @@ german, _ = Cuisine.objects.get_or_create(
 giovannis = Restaurant.objects.create(
     name="Giovannis",
     description="Authentic Italian cuisine in the heart of Colombo",
-    address="Colpetty, Colombo, Sri Lanka",
+    address="145 Thimbirigasyaya Rd, Colombo 00500",
     phone="+94 77 123 4567",
     email="info@giovannis.lk",
     website="https://giovannis.lk",
@@ -188,35 +180,44 @@ giovannis = Restaurant.objects.create(
     lowest_price=1000.0,
     highest_price=5000.0,
     is_published=True,
-    latitude=6.9022,
-    longitude=79.8613,
-    image="media/restaurant_images/Giovannis.jpg",
+    latitude=6.891540128732606,
+    longitude=79.86805530225179,
+    image="media/restaurant_images/giovannis.jpg",
     user=giovanni_manager
 )
 
 # Giovannis Menu
-antipasti = Category.objects.create(name="Antipasti", restaurant=giovannis)
+starter = Category.objects.create(name="Starters", restaurant=giovannis)
 pasta = Category.objects.create(name="Pasta", restaurant=giovannis)
 pizza = Category.objects.create(name="Pizza", restaurant=giovannis)
 dolci = Category.objects.create(name="Dolci", restaurant=giovannis)
 vino = Category.objects.create(name="Vino", restaurant=giovannis)
 
 MenuItem.objects.create(
-    name="Bruschetta al Pomodoro",
-    description="Toasted bread with fresh tomatoes, garlic, and basil",
+    name="Garlic Bread",
+    description="Toasted bread with cheese, garlic, and basil",
     price=1200,
-    category=antipasti,
+    category=starter,
+    is_available=True
+)
+
+MenuItem.objects.create(
+    name="Antipasto Italiano",
+    description="Cheese, salami, parma ham, pepperoni, blue cheese, black olives, and bread.",
+    price=1200,
+    category=starter,
+    is_available=True
+)
+
+MenuItem.objects.create(
+    name="Coteletto Di Pollo",
+    description="Chicken crumbed with cheese and rucola.",
+    price=1200,
+    category=starter,
     is_available=True
 )
 MenuItem.objects.create(
-    name="Carpaccio di Manzo",
-    description="Thinly sliced raw beef with arugula and parmesan",
-    price=1800,
-    category=antipasti,
-    is_available=True
-)
-MenuItem.objects.create(
-    name="Spaghetti Carbonara",
+    name="Carbonara",
     description="Classic pasta with eggs, cheese, pancetta, and black pepper",
     price=2200,
     category=pasta,
@@ -269,7 +270,7 @@ MenuItem.objects.create(
 culture_colombo = Restaurant.objects.create(
     name="Culture Colombo",
     description="Experience authentic Sri Lankan cuisine in a modern setting",
-    address="Bauddhaloka Mawatha, Colombo 07, Sri Lanka",
+    address="25 Kensington Garden, Colombo 00400",
     phone="+94 76 456 7890",
     email="reservations@culturecolombo.lk",
     website="https://culturecolombo.lk",
@@ -277,16 +278,16 @@ culture_colombo = Restaurant.objects.create(
     lowest_price=1000.0,
     highest_price=5000.0,
     is_published=True,
-    latitude=6.9147,
-    longitude=79.8665,
-    image="media/restaurant_images/CultureColombo.jpg",
+    latitude=6.882272694908216,
+    longitude=79.86126396863745,
+    image="media/restaurant_images/culture_colombo.jpg",
     user=culture_manager
 )
 
 # Culture Colombo Menu
-rice = Category.objects.create(name="Rice & Curry", restaurant=culture_colombo)
-hoppers = Category.objects.create(
-    name="Hoppers & String Hoppers", restaurant=culture_colombo)
+soup = Category.objects.create(name="Soup", restaurant=culture_colombo)
+dinner_menu = Category.objects.create(
+    name="Dinner Menu", restaurant=culture_colombo)
 seafood = Category.objects.create(
     name="Seafood Specialties", restaurant=culture_colombo)
 desserts = Category.objects.create(
@@ -295,45 +296,38 @@ beverages = Category.objects.create(
     name="Traditional Beverages", restaurant=culture_colombo)
 
 MenuItem.objects.create(
-    name="Traditional Rice & Curry",
-    description="White rice with 5 curries and sambol",
-    price=1500,
-    category=rice,
+    name="Vegetable Soup",
+    description="Farm Fresh Vegetable soup with a pinch of salt for your liking.",
+    price=850,
+    category=soup,
     is_available=True
 )
 MenuItem.objects.create(
-    name="Kottu Roti",
-    description="Chopped roti with vegetables, egg, and choice of meat",
-    price=1800,
-    category=rice,
+    name="Sweet Corn Chicken Soup",
+    description="Sweet corn kernels in a flavourful chicken soup with egg drop.hicken crumbed with cheese and rucola.",
+    price=1050,
+    category=soup,
     is_available=True
 )
 MenuItem.objects.create(
-    name="Egg Hoppers",
-    description="Traditional Sri Lankan hoppers with egg",
-    price=800,
-    category=hoppers,
+    name="Pittu",
+    description="A Local favourite & a regular. 3 pieces of Red or White Pittu served Kirihodi, Lunumiris, Coconut Milk & chefs dedicated Vegetable Dish.",
+    price=650,
+    category=dinner_menu,
     is_available=True
 )
 MenuItem.objects.create(
     name="String Hoppers",
-    description="Steamed rice flour noodles with coconut sambol",
-    price=900,
-    category=hoppers,
+    description="It’s an all rounder dish that a Sri Lankan would have for all 3 meals. 15 Nos Red or White String Hoppers served with the local favourite Kiri Hodi, Pol Sambol & chefs dedicated Vegetable Dish.",
+    price=650,
+    category=dinner_menu,
     is_available=True
 )
 MenuItem.objects.create(
-    name="Devilled Prawns",
-    description="Spicy stir-fried prawns with onions and peppers",
-    price=2800,
-    category=seafood,
-    is_available=True
-)
-MenuItem.objects.create(
-    name="Ambul Thiyal",
-    description="Traditional sour fish curry with goraka",
-    price=2500,
-    category=seafood,
+    name="Culture Special Chicken Kottu",
+    description="Kottu Rotti softend and Soaked in a thick curry, topped with 2 type of cheese sauce to bring the cheesiest kottu in town.",
+    price=2750,
+    category=dinner_menu,
     is_available=True
 )
 MenuItem.objects.create(
@@ -344,9 +338,9 @@ MenuItem.objects.create(
     is_available=True
 )
 MenuItem.objects.create(
-    name="Kiri Pani",
-    description="Traditional milk toffee",
-    price=800,
+    name="Hopper Mousse",
+    description="3 scoops of mousse served on a delicious Pani appa",
+    price=950,
     category=desserts,
     is_available=True
 )
@@ -361,8 +355,8 @@ MenuItem.objects.create(
 # 3. Monsoon Colombo (International)
 monsoon = Restaurant.objects.create(
     name="Monsoon Colombo",
-    description="Fusion cuisine with Asian and international influences",
-    address="50/2 Park Street, Colombo 00200, Sri Lanka",
+    description="The monsoons in South East Asian countries affect the style of food cooked across the region, from the way it is sourced to how it is prepared and consumed. At Monsoon Colombo, we revel in the variety of opportunities this offers us!",
+    address="50/2 Park Street, Colombo 00200",
     phone="+94 11 230 2449",
     email="reservations@monsooncolombo.com",
     website="https://www.monsooncolombo.com",
@@ -370,52 +364,59 @@ monsoon = Restaurant.objects.create(
     lowest_price=1000.0,
     highest_price=5000.0,
     is_published=True,
-    latitude=6.9219,
-    longitude=79.8567,
-    image="media/restaurant_images/2025-01-18.jpg",
+    latitude=6.916694911661506,
+    longitude=79.85849804410529,
+    image="media/restaurant_images/monsoon.jpg",
     user=monsoon_manager
 )
 
 # Monsoon Colombo Menu
 starters = Category.objects.create(name="Starters", restaurant=monsoon)
-mains = Category.objects.create(name="Main Courses", restaurant=monsoon)
-sides = Category.objects.create(name="Sides", restaurant=monsoon)
+mains = Category.objects.create(name="Rice & Noodle Sets", restaurant=monsoon)
+sides = Category.objects.create(name="Boa Buns", restaurant=monsoon)
 desserts = Category.objects.create(name="Desserts", restaurant=monsoon)
 cocktails = Category.objects.create(
     name="Signature Cocktails", restaurant=monsoon)
 
 MenuItem.objects.create(
-    name="Crispy Calamari",
-    description="Fried calamari with sweet chili sauce",
-    price=1800,
+    name="Thai Papaya Salad",
+    description="Som Tum Thai | dried shrimp . chilli . fresh lime dressing",
+    price=1450,
     category=starters,
     is_available=True
 )
 MenuItem.objects.create(
-    name="Duck Spring Rolls",
-    description="Crispy spring rolls with hoisin sauce",
-    price=2000,
+    name="Crispy Duck & Mushroom Wonton",
+    description="Shiitake mushroom . homemade sweet chilli dip",
+    price=2450,
     category=starters,
     is_available=True
 )
 MenuItem.objects.create(
-    name="Beef Rendang",
-    description="Slow-cooked beef in rich coconut curry",
-    price=2800,
+    name="Nasi Lemak",
+    description="Malaysian beef rendang . crispy fried anchovies . boiled egg toasted peanut . cucumber . sambal badjak . coconut milk rice",
+    price=3450,
     category=mains,
     is_available=True
 )
 MenuItem.objects.create(
     name="Pad Thai",
     description="Stir-fried rice noodles with prawns and peanuts",
-    price=2200,
+    price=2950,
     category=mains,
     is_available=True
 )
 MenuItem.objects.create(
-    name="Stir-fried Vegetables",
-    description="Seasonal vegetables in oyster sauce",
-    price=1200,
+    name="Hainanese Chicken Rice",
+    description="Fresh ginger sauce . chilli sauce . sweet soya sauce . chicken broth",
+    price=2950,
+    category=mains,
+    is_available=True
+)
+MenuItem.objects.create(
+    name="Grilled Honey & Sriracha Chicken",
+    description="Toasted sesame . sriracha mayo . spring onion",
+    price=950,
     category=sides,
     is_available=True
 )
@@ -439,7 +440,7 @@ MenuItem.objects.create(
 Review.objects.create(
     restaurant=giovannis,
     user=user1,
-    name="John Doe",
+    name=user1.first_name + " " + user1.last_name,
     rating=4.5,
     comment="Amazing Italian food! The pasta was perfect and the service was excellent."
 )
@@ -447,7 +448,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=giovannis,
     user=user2,
-    name="Sarah Smith",
+    name=user2.first_name + " " + user2.last_name,
     rating=5.0,
     comment="Best pizza in Colombo! The atmosphere is lovely and the staff is very friendly."
 )
@@ -455,7 +456,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=giovannis,
     user=user3,
-    name="Mike Wilson",
+    name=user3.first_name + " " + user3.last_name,
     rating=4.0,
     comment="Great food but a bit pricey. The wine selection is impressive."
 )
@@ -464,7 +465,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=culture_colombo,
     user=user4,
-    name="Lisa Jones",
+    name=user4.first_name + " " + user4.last_name,
     rating=5.0,
     comment="Authentic Sri Lankan cuisine at its best! The hoppers were amazing."
 )
@@ -472,7 +473,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=culture_colombo,
     user=user5,
-    name="David Brown",
+    name=user5.first_name + " " + user5.last_name,
     rating=4.5,
     comment="Loved the traditional rice and curry. The service was excellent."
 )
@@ -480,7 +481,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=culture_colombo,
     user=user1,
-    name="John Doe",
+    name=user1.first_name + " " + user1.last_name,
     rating=4.0,
     comment="Great place to experience local cuisine. The seafood dishes are outstanding."
 )
@@ -489,7 +490,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=monsoon,
     user=user2,
-    name="Sarah Smith",
+    name=user2.first_name + " " + user2.last_name,
     rating=4.5,
     comment="Beautiful fusion cuisine. The cocktails are creative and delicious."
 )
@@ -497,7 +498,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=monsoon,
     user=user3,
-    name="Mike Wilson",
+    name=user3.first_name + " " + user3.last_name,
     rating=5.0,
     comment="One of my favorite restaurants in Colombo. The beef rendang is a must-try!"
 )
@@ -505,7 +506,7 @@ Review.objects.create(
 Review.objects.create(
     restaurant=monsoon,
     user=user4,
-    name="Lisa Jones",
+    name=user4.first_name + " " + user4.last_name,
     rating=4.0,
     comment="Great atmosphere and food. The service could be a bit faster though."
 )

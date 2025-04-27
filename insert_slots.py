@@ -11,16 +11,13 @@ def create_slots():
 
     # Define time slots (6 slots per day)
     time_slots = [
-        time(11, 0),  # 11:00 AM
-        time(13, 0),  # 1:00 PM
-        time(15, 0),  # 3:00 PM
-        time(17, 0),  # 5:00 PM
+        time(20, 0),  # 5:00 PM
         time(19, 0),  # 7:00 PM
         time(21, 0),  # 9:00 PM
     ]
 
     # Define date range
-    start_date = datetime(2025, 4, 17).date()
+    start_date = datetime(2025, 4, 27).date()
     end_date = datetime(2025, 5, 10).date()
     print(f"Creating slots from {start_date} to {end_date}")
 
