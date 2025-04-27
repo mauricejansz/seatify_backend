@@ -157,6 +157,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "ultimate-wired-troll.ngrok-free.app",
     "seatify.zenvoerp.com",
+    "www.seatify.zenvoerp.com",
     "188.166.241.107:8001"
 ]
 
